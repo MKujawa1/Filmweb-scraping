@@ -1,2 +1,2 @@
-# Filmweb-scrapping
-Get movies data from filmweb website with requests and BeautifulSoap
+# Filmweb-scraping
+Get movies data from filmweb website with requests and BeautifulSoup
