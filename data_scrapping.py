@@ -2,42 +2,75 @@ import requests
 from bs4 import BeautifulSoup as bs
 import numpy as np
 import pandas as pd
-#Random user agent
+from random_user_agent.user_agent import UserAgent
+from random_user_agent.params import SoftwareName, OperatingSystem
+
+### Get random user agent 
+software_names = [SoftwareName.CHROME.value]
+operating_systems = [OperatingSystem.WINDOWS.value, OperatingSystem.LINUX.value]   
+user_agent_rotator = UserAgent(software_names=software_names, operating_systems=operating_systems, limit=100)
+user_agents = user_agent_rotator.get_user_agents()
+### Create 
+all_data = pd.DataFrame({'title':[],
+                         'year':[],
+                         'rate':[],
+                         'pop_rate':[],
+                         'want_see':[],
+                         'genre': []})
 
 cur_page = 1
 
 while True:
+    user_agent = user_agent_rotator.get_random_user_agent()
     url = f'https://www.filmweb.pl/films/search?orderBy=popularity&descending=true&page={cur_page}'
-    req = requests.get(url)
+    req = requests.get(url,headers = {'user-agent': user_agent})
     if req.status_code == 200:
+        
+        movie_title = []
+        movie_year = []
+        movie_rate = []
+        movie_pop_rate = []
+        movie_want_see = []
+        movie_genre = []
+        
         data = bs(req.content, 'html.parser')
         movies = data.find_all('div', class_ = 'filmPreview__card')
         for movie in movies:
             try:
                 title = movie.h2.text
+                movie_title.append(title)
             except:
                 # print('no title')
                 title = np.nan
+                movie_title.append(title)
             try:
                 year = int(movie.find('div',class_ = 'filmPreview__year').text)
+                movie_year.append(year)
             except:
                 # print('no year')
                 year = np.nan
+                movie_year.append(year)
             try:
                 rate = float(movie.find('span', class_ = 'rateBox__rate').text.replace(',','.'))
+                movie_rate.append(rate)
             except:
                 # print('no rate')
                 rate = np.nan
+                movie_rate.append(rate)
             try:
                 pop_rate = int(movie.find('span',class_ = 'rateBox__votes rateBox__votes--count').text.replace(' ', ''))
+                movie_pop_rate.append(pop_rate)
             except:
                 # print('no pop_rate')
                 pop_rate = np.nan
+                movie_pop_rate.append(pop_rate)
             try:
                 want_see = int(movie.find('span',class_ = 'wantToSee__count').text.replace(' ', ''))
+                movie_want_see.append(want_see)
             except:
                 # print('no want_see')
                 want_see = np.nan
+                movie_want_see.append(want_see)
             try:
                 genres = movie.find('div',class_ = 'filmPreview__info filmPreview__info--genres')
                 genre = []
@@ -46,13 +79,23 @@ while True:
                     for gen in genres:
                         genre.append(gen.text)
                 except:
-                    genre.append(genres.a.text)  
+                    genre.append(genres.a.text)
+                movie_genre.append(genre)
             except:
-                # print('no genre')
                 genre = np.nan
+                movie_genre.append(genre)
             print(title,year,rate,pop_rate,want_see,genre)
         else:
             pass
+        
+        all_data = all_data.append(pd.DataFrame({'title':movie_title,
+                                                 'year':movie_year,
+                                                 'rate':movie_rate,
+                                                 'pop_rate':movie_pop_rate,
+                                                 'want_see':movie_want_see,
+                                                 'genre': movie_genre}),ignore_index = True)   
+        print(cur_page)
+        
         pages = data.find('ul', class_ = 'pagination__list')
         page = pages.find_all('li',class_ = 'pagination__item')
         max_p = []
@@ -64,5 +107,6 @@ while True:
         max_p = np.amax(max_p)
         if max_p == int(cur_page):
             break
-        print(cur_page)
+
         cur_page += 1
+        
