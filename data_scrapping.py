@@ -10,29 +10,33 @@ software_names = [SoftwareName.CHROME.value]
 operating_systems = [OperatingSystem.WINDOWS.value, OperatingSystem.LINUX.value]   
 user_agent_rotator = UserAgent(software_names=software_names, operating_systems=operating_systems, limit=100)
 user_agents = user_agent_rotator.get_user_agents()
-### Create 
+### Create empty dataframe
 all_data = pd.DataFrame({'title':[],
                          'year':[],
                          'rate':[],
                          'pop_rate':[],
                          'want_see':[],
                          'genre': []})
-
+### Init first page
 cur_page = 1
-
+### Loop start
 while True:
+    ### Get user agent
     user_agent = user_agent_rotator.get_random_user_agent()
+    ### Url of page
     url = f'https://www.filmweb.pl/films/search?orderBy=popularity&descending=true&page={cur_page}'
+    ### Get request 
     req = requests.get(url,headers = {'user-agent': user_agent})
+    ### Check status of request
     if req.status_code == 200:
-        
+        ### Create empty list to append data
         movie_title = []
         movie_year = []
         movie_rate = []
         movie_pop_rate = []
         movie_want_see = []
         movie_genre = []
-        
+        ### Read items from page and adding to list
         data = bs(req.content, 'html.parser')
         movies = data.find_all('div', class_ = 'filmPreview__card')
         for movie in movies:
@@ -87,7 +91,7 @@ while True:
             print(title,year,rate,pop_rate,want_see,genre)
         else:
             pass
-        
+        ### Append data to DataFrame
         all_data = all_data.append(pd.DataFrame({'title':movie_title,
                                                  'year':movie_year,
                                                  'rate':movie_rate,
@@ -95,7 +99,7 @@ while True:
                                                  'want_see':movie_want_see,
                                                  'genre': movie_genre}),ignore_index = True)   
         print(cur_page)
-        
+        ### Check that the current page isn't last page
         pages = data.find('ul', class_ = 'pagination__list')
         page = pages.find_all('li',class_ = 'pagination__item')
         max_p = []
@@ -107,6 +111,7 @@ while True:
         max_p = np.amax(max_p)
         if max_p == int(cur_page):
             break
-
+        ### Page increament
         cur_page += 1
-        
+### Save to excel      
+all_data.to_excel('data.xlsx',index=False)
