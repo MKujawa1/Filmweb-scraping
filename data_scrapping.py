@@ -115,3 +115,24 @@ while True:
         cur_page += 1
 ### Save to excel      
 all_data.to_excel('data.xlsx',index=False)
+### Clean Data
+### Load data
+data = pd.read_excel('data.xlsx')
+### Remove [] and ' from genre
+for i in range(len(data)):
+    try:
+        data['genre'][i] = data['genre'][i].replace('[','').replace(']','').replace("'",'')
+    except:
+        pass
+### Remove nan values
+keys = list(data.keys())
+indexes = []
+for i in range(len(data)):
+    for col_n in keys:
+        if pd.isna(data[col_n][i])==True:
+            indexes.append(i)
+indexes = list(set(indexes))
+
+new_data = data.drop(data.index[indexes])
+
+new_data.to_excel('new_data.xlsx',index=False)

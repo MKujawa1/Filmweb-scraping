@@ -1,18 +1,35 @@
 import dearpygui.dearpygui as dpg
+import pandas as pd 
+### Load data
+data = pd.read_excel('new_data.xlsx')
 
+categories = []
+for i in range(len(data)):
+    gen = data['genre'][i].split(', ')
+    for k in range(len(gen)):
+        categories.append(gen[k])
+categories = list(set(categories))
+keys = list(data.keys())
+        
 dpg.create_context()
-
 with dpg.window(tag = 'Main',):
     with dpg.child_window(tag = 'Filter',parent = 'Main'):
         pass
     with dpg.child_window(tag = 'Sort',parent = 'Main'):
         pass
     with dpg.child_window(tag = 'Table',parent = 'Main'):
-        pass
-
-
+        with dpg.table(tag = 'Test',header_row=True):
+            for key in keys:
+                dpg.add_table_column(label = key,parent = 'Test')
+                
+            for i in range(len(data)):
+                with dpg.table_row():
+                    for j in range(len(keys)):
+                        dpg.table_cell
+                        dpg.add_text(str(data.iloc[i][j]))
+            
 dpg.set_primary_window('Main',True)
-dpg.create_viewport(title = 'Filmweb Management', width=800, height=600)
+dpg.create_viewport(title = 'Filmweb Management', width=1200, height=600)
 dpg.setup_dearpygui()
 dpg.show_viewport()
 
