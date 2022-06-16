@@ -113,7 +113,9 @@ def reset():
 def filtering(sender):
     # test = data.drop(data[(data['genre']=='Komedia')].index)
     global edit_data
+    
     global data
+    edit_data = data
     min_year = int(dpg.get_value('year_start'))
     max_year = int(dpg.get_value('year_stop'))
     min_rate = float(dpg.get_value('rate_start'))
@@ -123,8 +125,9 @@ def filtering(sender):
     min_want = int(dpg.get_value('want_start'))
     max_want = int(dpg.get_value('want_stop'))
     cat = dpg.get_value('gen')
+    print(min_year)
     
-    edit_data = data.drop(data[(data[keys[1]]<=min_year)&(data[keys[1]]>=max_year)].index)
+    edit_data = edit_data.drop(edit_data[(edit_data[keys[1]]<=min_year)&(edit_data[keys[1]]>=max_year)].index)
     edit_data = edit_data.drop(edit_data[(edit_data[keys[2]]<=min_rate)&(edit_data[keys[2]]>=max_rate)].index)
     edit_data = edit_data.drop(edit_data[(edit_data[keys[3]]<=min_pop)&(edit_data[keys[3]]>=max_pop)].index)   
     edit_data = edit_data.drop(edit_data[(edit_data[keys[4]]<=min_want)&(edit_data[keys[4]]>=max_want)].index)
