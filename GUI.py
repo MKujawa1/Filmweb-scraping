@@ -22,7 +22,7 @@ keys = list(data.keys())
 def add_row():
     # rows = 0
     global rows
-    for j in range(len(edit_data[:200])):
+    for j in range(len(edit_data[:500])):
         with dpg.table_row(parent="maintable"):
             for i in range(len(keys)):
                 dpg.add_text(str(edit_data.iloc[rows][i]), tag=f"cell_{rows}{i}{j}")      
